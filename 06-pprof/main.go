@@ -1,43 +1,40 @@
 package main
 
 import (
-	"io/ioutil"
-	"log"
+	"math/rand"
 	"net/http"
 	_ "net/http/pprof"
-	"time"
 )
 
-func hiHandler(w http.ResponseWriter, r *http.Request) {
-	leakyFunction()
-	resp, err := http.Get("https://swapi.dev/api/people/1")
-	if err != nil {
-		log.Fatalln(err)
-	}
-	//We Read the response body on the line below.
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	//Convert the body to type string
-	sb := string(body)
-	log.Printf(sb)
-	w.Write([]byte(sb))
+type Person struct {
+	Name string
+	ID   int
+}
 
+func randPerson() *Person {
+	name := make([]byte, 50)
+	for i := 0; i < 50; i++ {
+		name[i] = byte(65 + rand.Intn(25))
+	}
+	id := rand.Intn(10e6)
+	return &Person{
+		Name: string(name),
+		ID:   id,
+	}
+}
+
+func leakyFunction(w http.ResponseWriter, r *http.Request) {
+	n := int(10e6)
+	people := make(map[int]*Person)
+	for i := 1; i < n; i++ {
+		person := randPerson()
+		people[person.ID] = person
+	}
+	println(len(people), "#####", n)
+	w.Write([]byte("done"))
 }
 
 func main() {
-	http.HandleFunc("/", hiHandler)
+	http.HandleFunc("/", leakyFunction)
 	http.ListenAndServe(":8080", nil)
-}
-
-func leakyFunction() []string {
-	s := make([]string, 3)
-	for i := 0; i < 10000000; i++ {
-		s = append(s, "magical pandas")
-		if (i % 100000) == 0 {
-			time.Sleep(500 * time.Millisecond)
-		}
-	}
-	return s
 }
