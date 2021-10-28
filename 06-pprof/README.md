@@ -14,3 +14,4 @@ Formas de profiling em Go: [link](https://hackernoon.com/go-the-complete-guide-t
 
 
 `go tool pprof -http=:8081 http://127.0.0.1:8080/debug/pprof/profile`
+`go tool pprof -http=:8081 http://127.0.0.1:8080/debug/pprof/heap`
